@@ -1,15 +1,15 @@
 <div class="app-shell">
   <header class="topbar">
     <div>
-      <p class="eyebrow">COMP 3133 Assignment 2</p>
-      <h1>Employee Management Frontend</h1>
+      <h1>Employee Management App</h1>
     </div>
 
     <nav class="nav-links">
       @if (sessionService.isAuthenticated()) {
-        <a routerLink="/employees" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-          Employees
-        </a>
+        <div class="user-chip" aria-label="Logged in user">
+          <span class="user-icon">👤</span>
+          <span class="user-name">{{ getHeaderUserDisplayName() }}</span>
+        </div>
         <button type="button" class="logout-button" (click)="logout()">Logout</button>
       } @else {
         <a routerLink="/login" routerLinkActive="active">Login</a>

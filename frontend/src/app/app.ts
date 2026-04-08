@@ -1,4 +1,5 @@
-import { Component, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Component, PLATFORM_ID, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { SessionService } from './services/session.service';
 
@@ -12,6 +13,25 @@ import { SessionService } from './services/session.service';
 export class App {
   protected readonly sessionService = inject(SessionService);
   private readonly router = inject(Router);
+  private readonly platformId = inject(PLATFORM_ID);
+
+  constructor() {
+    this.sessionService.ensureSessionLoaded();
+  }
+
+  getHeaderUserDisplayName(): string {
+    const sessionUser = this.sessionService.userDisplayName();
+
+    if (sessionUser) {
+      return sessionUser;
+    }
+
+    if (!isPlatformBrowser(this.platformId)) {
+      return 'Current user';
+    }
+
+    return localStorage.getItem('comp3133_user') || 'Current user';
+  }
 
   logout(): void {
     this.sessionService.clearToken();

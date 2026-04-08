@@ -44,7 +44,7 @@ export class AuthService {
 
         return token;
       }),
-      tap((token) => this.sessionService.setToken(token))
+      tap((token) => this.sessionService.setSession(token, usernameOrEmail))
     );
   }
 

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { SessionService } from '../../services/session.service';
 
 @Component({
   selector: 'app-login',
@@ -11,9 +12,9 @@ import { AuthService } from '../../services/auth.service';
   template: `
     <section class="auth-card">
       <div>
-        <p class="label">Welcome back</p>
+        <p class="label">Welcome!</p>
         <h2>Login</h2>
-        <p class="supporting-text">Use your username or email and password to access the employee dashboard.</p>
+        <p class="supporting-text">Sign in before accessing the employee management screens.</p>
       </div>
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
@@ -143,6 +144,7 @@ import { AuthService } from '../../services/auth.service';
 export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly sessionService = inject(SessionService);
   private readonly router = inject(Router);
 
   readonly isSubmitting = signal(false);
@@ -172,6 +174,7 @@ export class LoginComponent {
 
     this.authService.login(usernameOrEmail, password).subscribe({
       next: () => {
+        this.sessionService.setUserDisplayName(usernameOrEmail);
         this.isSubmitting.set(false);
         this.router.navigate(['/employees']);
       },

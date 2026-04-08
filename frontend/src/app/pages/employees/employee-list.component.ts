@@ -16,7 +16,7 @@ import { EmployeeDetailModalComponent } from '../../components/employee-detail-m
         <div>
           <p class="eyebrow">Employee Management</p>
           <h2>Employee List</h2>
-          <p>Manage employees, open profile details, and move into edit or delete actions from one screen.</p>
+          <p>Manage employee records, view profile details, add new employees, and use quick actions to edit or delete entries from one place.</p>
         </div>
 
         <a routerLink="/employees/new" class="primary-link">Add Employee</a>

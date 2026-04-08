@@ -27,18 +27,10 @@
   align-items: center;
 }
 
-.eyebrow {
-  margin: 0 0 6px;
-  font-size: 0.78rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #0f766e;
-  font-weight: 700;
-}
-
 h1 {
   margin: 0;
-  font-size: clamp(1.7rem, 3vw, 2.6rem);
+  font-size: clamp(1.8rem, 3vw, 2.7rem);
+  letter-spacing: -0.03em;
 }
 
 .nav-links {
@@ -46,6 +38,34 @@ h1 {
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+}
+
+.user-chip {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  min-width: 84px;
+}
+
+.user-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #ecfeff;
+  color: #0f766e;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.user-name {
+  color: #134e4a;
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-align: center;
+  max-width: 120px;
+  overflow-wrap: anywhere;
 }
 
 .nav-links a,
