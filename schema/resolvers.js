@@ -2,6 +2,45 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Employee = require("../models/Employee");
+const cloudinary = require("../config/cloudinary");
+
+const canUploadToCloudinary = () =>
+  Boolean(
+    process.env.CLOUDINARY_NAME &&
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_SECRET
+  );
+
+const formatEmployee = (employee) => {
+  if (!employee) {
+    return employee;
+  }
+
+  return {
+    ...employee.toObject(),
+    date_of_joining: new Date(employee.date_of_joining).toISOString(),
+  };
+};
+
+const resolveProfilePicture = async (profilePicture) => {
+  if (!profilePicture) {
+    return undefined;
+  }
+
+  if (!profilePicture.startsWith("data:image")) {
+    return profilePicture;
+  }
+
+  if (!canUploadToCloudinary()) {
+    return profilePicture;
+  }
+
+  const uploadResult = await cloudinary.uploader.upload(profilePicture, {
+    folder: "comp3133/employees",
+  });
+
+  return uploadResult.secure_url;
+};
 
 module.exports = {
   Query: {
@@ -17,13 +56,20 @@ module.exports = {
       return jwt.sign({ id: user._id }, process.env.JWT_SECRET);
     },
 
-    getEmployees: async () => Employee.find(),
-    getEmployeeById: async (_, { id }) => Employee.findById(id),
+    getEmployees: async () => {
+      const employees = await Employee.find().sort({ created_at: -1 });
+      return employees.map(formatEmployee);
+    },
+    getEmployeeById: async (_, { id }) => {
+      const employee = await Employee.findById(id);
+      return formatEmployee(employee);
+    },
 
     searchEmployee: async (_, { department, designation }) => {
-      return Employee.find({
+      const employees = await Employee.find({
         $or: [{ department }, { designation }],
       });
+      return employees.map(formatEmployee);
     },
   },
 
@@ -36,12 +82,24 @@ module.exports = {
     },
 
     addEmployee: async (_, args) => {
-      const emp = new Employee(args);
-      return emp.save();
+      const profile_picture = await resolveProfilePicture(args.profile_picture);
+      const emp = new Employee({ ...args, profile_picture });
+      const savedEmployee = await emp.save();
+      return formatEmployee(savedEmployee);
     },
 
     updateEmployee: async (_, { id, ...data }) => {
-      return Employee.findByIdAndUpdate(id, data, { new: true });
+      const updateData = { ...data };
+
+      if (Object.prototype.hasOwnProperty.call(data, "profile_picture")) {
+        updateData.profile_picture = await resolveProfilePicture(data.profile_picture);
+      }
+
+      const updatedEmployee = await Employee.findByIdAndUpdate(id, updateData, {
+        new: true,
+      });
+
+      return formatEmployee(updatedEmployee);
     },
 
     deleteEmployee: async (_, { id }) => {

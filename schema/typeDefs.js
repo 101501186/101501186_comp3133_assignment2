@@ -12,6 +12,7 @@ module.exports = gql`
     first_name: String!
     last_name: String!
     email: String
+    profile_picture: String
     gender: String
     designation: String!
     salary: Float!
@@ -32,6 +33,7 @@ module.exports = gql`
       first_name: String!
       last_name: String!
       email: String
+      profile_picture: String
       gender: String
       designation: String!
       salary: Float!
@@ -39,7 +41,18 @@ module.exports = gql`
       department: String!
     ): Employee
 
-    updateEmployee(id: ID!, designation: String, salary: Float): Employee
+    updateEmployee(
+      id: ID!
+      first_name: String
+      last_name: String
+      email: String
+      profile_picture: String
+      gender: String
+      designation: String
+      salary: Float
+      date_of_joining: String
+      department: String
+    ): Employee
     deleteEmployee(id: ID!): String
   }
 `;
