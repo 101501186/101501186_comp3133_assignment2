@@ -71,7 +71,7 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
 
       <p class="footer-link">
         Already registered?
-        <a routerLink="/login">Return to login</a>
+        <a routerLink="/login">Login here</a>
       </p>
     </section>
   `,

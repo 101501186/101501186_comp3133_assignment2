@@ -25,7 +25,7 @@ import { EmployeeDetailModalComponent } from '../../components/employee-detail-m
       <form class="search-card" [formGroup]="searchForm" (ngSubmit)="searchEmployees()">
         <label>
           Search by Department or Position
-          <input type="text" formControlName="searchTerm" placeholder="Try HR, Sales, Manager, Developer..." />
+          <input type="text" formControlName="searchTerm" placeholder="Sales, Manager, Developer..." />
         </label>
 
         <div class="search-actions">
@@ -52,7 +52,7 @@ import { EmployeeDetailModalComponent } from '../../components/employee-detail-m
         @if (isLoading()) {
           <p class="empty-state">Loading employees...</p>
         } @else if (employees().length === 0) {
-          <p class="empty-state">No employees found yet. Add your first employee to populate the table.</p>
+          <p class="empty-state">No employees found</p>
         } @else {
           <div class="table-wrap">
             <table>
