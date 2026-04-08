@@ -12,6 +12,10 @@ interface GetEmployeeResponse {
   getEmployeeById: Employee;
 }
 
+interface SearchEmployeesResponse {
+  searchEmployee: Employee[];
+}
+
 interface AddEmployeeResponse {
   addEmployee: Employee;
 }
@@ -84,6 +88,36 @@ export class EmployeeService {
 
         return employee;
       })
+    );
+  }
+
+  searchEmployees(searchTerm: string): Observable<Employee[]> {
+    const trimmedSearchTerm = searchTerm.trim();
+
+    return this.apollo.query<SearchEmployeesResponse>({
+      query: gql`
+        query SearchEmployee($department: String, $designation: String) {
+          searchEmployee(department: $department, designation: $designation) {
+            _id
+            first_name
+            last_name
+            email
+            profile_picture
+            gender
+            designation
+            salary
+            date_of_joining
+            department
+          }
+        }
+      `,
+      variables: {
+        department: trimmedSearchTerm || null,
+        designation: trimmedSearchTerm || null
+      },
+      fetchPolicy: 'no-cache'
+    }).pipe(
+      map((result) => result.data?.searchEmployee ?? [])
     );
   }
 

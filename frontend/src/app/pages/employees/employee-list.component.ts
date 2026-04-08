@@ -1,5 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Employee } from '../../models/employee.model';
 import { EmployeeService } from '../../services/employee.service';
@@ -8,7 +9,7 @@ import { EmployeeDetailModalComponent } from '../../components/employee-detail-m
 @Component({
   selector: 'app-employee-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, DatePipe, EmployeeDetailModalComponent],
+  imports: [CommonModule, RouterLink, DatePipe, ReactiveFormsModule, EmployeeDetailModalComponent],
   template: `
     <section class="page-shell">
       <div class="page-header">
@@ -21,12 +22,30 @@ import { EmployeeDetailModalComponent } from '../../components/employee-detail-m
         <a routerLink="/employees/new" class="primary-link">Add Employee</a>
       </div>
 
+      <form class="search-card" [formGroup]="searchForm" (ngSubmit)="searchEmployees()">
+        <label>
+          Search by Department or Position
+          <input type="text" formControlName="searchTerm" placeholder="Try HR, Sales, Manager, Developer..." />
+        </label>
+
+        <div class="search-actions">
+          <button type="submit">Search</button>
+          <button type="button" class="secondary" (click)="resetSearch()">Clear</button>
+        </div>
+      </form>
+
       @if (errorMessage()) {
         <p class="banner error">{{ errorMessage() }}</p>
       }
 
       @if (successMessage()) {
         <p class="banner success">{{ successMessage() }}</p>
+      }
+
+      @if (isSearchActive()) {
+        <p class="search-summary">
+          Showing filtered results for department or position matches.
+        </p>
       }
 
       <div class="table-card">
@@ -126,6 +145,42 @@ import { EmployeeDetailModalComponent } from '../../components/employee-detail-m
       border-radius: 16px;
     }
 
+    .search-card {
+      padding: 20px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+      display: grid;
+      gap: 16px;
+    }
+
+    label {
+      display: grid;
+      gap: 8px;
+      color: #334155;
+      font-weight: 600;
+    }
+
+    input {
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font: inherit;
+    }
+
+    input:focus {
+      outline: 2px solid #0f766e;
+      outline-offset: 2px;
+      border-color: #0f766e;
+    }
+
+    .search-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
     .banner.error {
       background: #fee2e2;
       color: #b91c1c;
@@ -134,6 +189,11 @@ import { EmployeeDetailModalComponent } from '../../components/employee-detail-m
     .banner.success {
       background: #dcfce7;
       color: #166534;
+    }
+
+    .search-summary {
+      color: #0f766e;
+      font-weight: 600;
     }
 
     .table-card {
@@ -210,16 +270,21 @@ import { EmployeeDetailModalComponent } from '../../components/employee-detail-m
   `]
 })
 export class EmployeeListComponent implements OnInit {
+  private readonly fb = inject(FormBuilder);
   private readonly employeeService = inject(EmployeeService);
   private readonly router = inject(Router);
 
   protected readonly employees = signal<Employee[]>([]);
   protected readonly selectedEmployee = signal<Employee | null>(null);
   protected readonly isLoading = signal(true);
+  protected readonly isSearchActive = signal(false);
   protected readonly errorMessage = signal('');
   protected readonly successMessage = signal('');
   protected readonly fallbackImage =
     'https://placehold.co/200x200/e2e8f0/475569?text=Employee';
+  protected readonly searchForm = this.fb.nonNullable.group({
+    searchTerm: ['']
+  });
 
   ngOnInit(): void {
     this.loadEmployees();
@@ -228,6 +293,7 @@ export class EmployeeListComponent implements OnInit {
   loadEmployees(): void {
     this.isLoading.set(true);
     this.errorMessage.set('');
+    this.successMessage.set('');
 
     this.employeeService.getEmployees().subscribe({
       next: (employees) => {
@@ -239,6 +305,41 @@ export class EmployeeListComponent implements OnInit {
         this.isLoading.set(false);
       }
     });
+  }
+
+  searchEmployees(): void {
+    const { searchTerm } = this.searchForm.getRawValue();
+    const trimmedSearchTerm = searchTerm.trim();
+    const hasFilters = Boolean(trimmedSearchTerm);
+
+    if (!hasFilters) {
+      this.resetSearch();
+      return;
+    }
+
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    this.employeeService.searchEmployees(trimmedSearchTerm).subscribe({
+      next: (employees) => {
+        this.employees.set(employees);
+        this.isSearchActive.set(true);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        this.errorMessage.set(error.message ?? 'Unable to search employees.');
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  resetSearch(): void {
+    this.searchForm.reset({
+      searchTerm: ''
+    });
+    this.isSearchActive.set(false);
+    this.loadEmployees();
   }
 
   viewEmployee(id: string): void {

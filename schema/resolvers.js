@@ -66,9 +66,18 @@ module.exports = {
     },
 
     searchEmployee: async (_, { department, designation }) => {
-      const employees = await Employee.find({
-        $or: [{ department }, { designation }],
-      });
+      const filters = [];
+
+      if (department) {
+        filters.push({ department: new RegExp(department, "i") });
+      }
+
+      if (designation) {
+        filters.push({ designation: new RegExp(designation, "i") });
+      }
+
+      const query = filters.length > 0 ? { $or: filters } : {};
+      const employees = await Employee.find(query).sort({ created_at: -1 });
       return employees.map(formatEmployee);
     },
   },
