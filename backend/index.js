@@ -8,9 +8,19 @@ const resolvers = require("./schema/resolvers");
 
 const app = express();
 const port = process.env.PORT || 4000;
+const allowedOrigins = [
+  "http://localhost:4200",
+  process.env.FRONTEND_URL,
+].filter(Boolean);
 
 app.use(cors({
-  origin: "http://localhost:4200"
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS"));
+  }
 }));
 
 connectDB();
