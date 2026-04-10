@@ -15,7 +15,9 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    const isVercelOrigin = typeof origin === "string" && origin.endsWith(".vercel.app");
+
+    if (!origin || allowedOrigins.includes(origin) || isVercelOrigin) {
       return callback(null, true);
     }
 
@@ -26,7 +28,11 @@ app.use(cors({
 connectDB();
 
 async function startServer() {
-  const server = new ApolloServer({ typeDefs, resolvers });
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    cache: "bounded",
+  });
   await server.start();
   server.applyMiddleware({ app });
 
