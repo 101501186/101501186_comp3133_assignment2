@@ -4,7 +4,7 @@ Employee Management App built for COMP 3133 using Angular for the frontend and N
 
 ## Live Links
 
-- Frontend: [Vercel Deployment](https://101501186-comp3133-assignment2-zy4k-j6fnkyqyn.vercel.app)
+- Frontend: [Vercel Deployment](https://101501186-comp3133-assignment2-zy4k-jl62mn68c.vercel.app)
 - Backend: [Render GraphQL API](https://one01501186-comp3133-assignment2-backend.onrender.com/graphql)
 
 ## Features
